@@ -7,6 +7,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import sequelize from './config/database';
 import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes';
 import authMiddleware from './middleware/auth';
 import path from 'path';
 
@@ -19,12 +20,9 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Authentication routes
-app.use('/auth', authRoutes);
+app.use(authRoutes);
+app.use(userRoutes)
 
-// Protected route example
-app.get('/protected', authMiddleware, (req, res) => {
-  res.send('This is a protected route');
-});
 
 // Create HTTP server
 const httpServer = createServer(app);
@@ -39,20 +37,34 @@ const io = new Server(httpServer, {
 
 io.on('connection', (socket) => {
   console.log('a user connected', socket.id);
+
+  // Join a room
+  socket.join('room1');
+
+  // Handle incoming messages from clients
   socket.on('message', (data) => {
     console.log('message received:', data);
-    //message back to the client
-    // socket.emit('message', `Server get: ${data}`);
-    // Broadcast the received message to all connected clients
-    io.emit('message', `Server get: ${data}`);
+    
+    // Broadcast the message to all clients in the 'room1' room
+    io.to('room1').emit('message', `Server get: ${data}`);
   });
 
+  // Handle disconnection of clients
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+
+// app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1d', // Cache static assets for 1 day
+  setHeaders: (res, path) => {
+    if (express.static.mime.lookup(path) === 'text/html') {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
 
 // Sync Sequelize models and start the server
 sequelize.sync().then(() => {
