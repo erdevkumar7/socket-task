@@ -11,7 +11,7 @@ const cacheMiddleware = (key: string) => async (req: Request, res: any, next: Ne
 
   res.sendResponse = res.json;
   res.json = (body: any) => {
-    // redisClient.set(key, JSON.stringify(body), 'EX', 3600); // Cache for 1 hour
+    //redisClient.set(key, JSON.stringify(body), 'EX', 3600); // Cache for 1 hour
     res.sendResponse(body);
   };
 

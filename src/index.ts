@@ -8,26 +8,20 @@ import { Server } from 'socket.io';
 import sequelize from './config/database';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
-import authMiddleware from './middleware/auth';
 import path from 'path';
-
 dotenv.config();
-
 const app = express();
 const port = process.env.PORT || 8000;
-
+// Middlewares
 app.use(express.json());
 app.use(cookieParser());
 
 // Authentication routes
 app.use(authRoutes);
+// User routes
 app.use(userRoutes)
 
-
-// Create HTTP server
 const httpServer = createServer(app);
-
-// Setup Socket.IO
 const io = new Server(httpServer, {
   cors: {
     origin: "*",
@@ -37,24 +31,17 @@ const io = new Server(httpServer, {
 
 io.on('connection', (socket) => {
   console.log('a user connected', socket.id);
-
   // Join a room
   socket.join('room1');
-
-  // Handle incoming messages from clients
   socket.on('message', (data) => {
     console.log('message received:', data);
-    
     // Broadcast the message to all clients in the 'room1' room
-    io.to('room1').emit('message', `Server get: ${data}`);
+    io.to('room1').emit('message', `${data}`);
   });
-
-  // Handle disconnection of clients
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
 });
-
 
 // app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public'), {
@@ -66,7 +53,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }));
 
-// Sync Sequelize models and start the server
 sequelize.sync().then(() => {
   httpServer.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);

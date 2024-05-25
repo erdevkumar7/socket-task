@@ -4,13 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Socket.IO Chat</title>
+    <style>
+      #messages {
+        list-style: none;
+        padding: 0;
+      }
+    </style>
   </head>
   <body>
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
-    <ul id="messages"></ul>
-
+    <div id="messages-container">
+      <ul id="messages"></ul>
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();

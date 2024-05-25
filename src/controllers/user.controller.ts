@@ -7,6 +7,7 @@ interface getRequest extends Request {
   user?: any;
 }
 
+
 export const getUserProfile = async (req: getRequest, res: Response) => {
   const { id } = req.user;
   const cacheKey = `user_profile_${id}`;
@@ -27,7 +28,7 @@ export const getUserProfile = async (req: getRequest, res: Response) => {
     }
 
     // Cache the profile data and send response
-    // redisClient.set(cacheKey, JSON.stringify(user), 'EX', 3600); // Cache for 1 hour
+    //redisClient.set(cacheKey, JSON.stringify(user), 'EX', 3600); // Cache for 1 hour
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
